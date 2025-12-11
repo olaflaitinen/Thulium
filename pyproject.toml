@@ -3,16 +3,16 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "thulium"
-version = "0.2.0"
-description = "Thulium - State-of-the-art Multilingual Handwriting Text Recognition for Python"
+name = "thulium-htr"
+version = "1.0.0"
+description = "Thulium - State-of-the-Art Multilingual Handwriting Text Recognition for Python"
 readme = "README.md"
 authors = [
   { name = "Thulium Contributors", email = "opensource@thulium.ai" },
 ]
 license = { file = "LICENSE" }
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",

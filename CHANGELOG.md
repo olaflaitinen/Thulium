@@ -5,94 +5,87 @@ All notable changes to Thulium will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+---
+
+## [1.0.0] - 2024-12-11
+
+**Production-Ready Release**
+
+This release marks Thulium as production-ready with comprehensive multilingual support, state-of-the-art architectures, and professional documentation.
+
+### Added
+
+**Documentation Enhancement**
+- Complete README rewrite with professional badges and Mermaid architecture diagrams
+- Enhanced `docs/architecture.md` with class diagrams, component hierarchies, and mathematical formulas
+- Comprehensive `docs/evaluation/metrics.md` with fairness metrics and statistical analysis
+- Detailed benchmark documentation with per-language performance tables
+- Academic citation block for research publications
+
+**Architecture Diagrams**
+- System-level architecture diagram with all processing layers
+- Model architecture diagram showing backbone, sequence head, and decoder variants
+- Pipeline flow diagrams with preprocessing, segmentation, and recognition stages
+- Evaluation framework diagram with metrics and analysis components
+- XAI layer explainability diagram
+
+**Mathematical Formulations**
+- CER/WER/SER metric definitions with formal notation
+- CTC loss formulation with path marginalization
+- Attention mechanism equations (scaled dot-product, multi-head)
+- Language model scoring formulas for beam search
+- Cross-language fairness metrics (Delta_CER, Sigma_CER)
+
+### Changed
+
+- Version upgraded to 1.0.0 (Production/Stable)
+- Development Status classifier updated from Beta to Production/Stable
+- PyPI package name: `thulium-htr`
+- README restructured with collapsible language sections
+- All badges updated with flat-square style and correct package name
+
+### Language Support
+
+Complete first-class support for 56 languages across 12 writing systems:
+
+| Region | Languages |
+|:-------|:----------|
+| Scandinavian | Norwegian (Bokmal, Nynorsk), Swedish, Danish, Icelandic, Faroese, Finnish |
+| Baltic | Lithuanian, Latvian, Estonian |
+| Caucasus | Azerbaijani, Turkish, Georgian, Armenian |
+| Western Europe | English, German, French, Spanish, Portuguese, Italian, Dutch |
+| Eastern Europe | Polish, Czech, Slovak, Hungarian, Romanian, Croatian, Slovenian, Russian, Ukrainian, Bulgarian, Serbian, Greek |
+| Middle East | Arabic, Persian, Urdu, Hebrew |
+| South Asia | Hindi, Marathi, Bengali, Tamil, Telugu, Gujarati, Punjabi, Kannada, Malayalam |
+| East Asia | Chinese, Japanese, Korean |
+| Southeast Asia | Thai, Vietnamese, Indonesian, Malay |
+| Africa | Swahili, Afrikaans |
+
+---
+
 ## [0.2.0] - 2024-12-11
 
 ### Added
 
-**Language Parity**
-- Complete language profiles for 52+ languages across 12 writing systems
-- First-class support for every language with explicit configuration and examples
-- Regional language groups: Scandinavian, Baltic, Caucasus, Western Europe, Eastern Europe, Middle East, South Asia, East Asia, Southeast Asia, Africa
-- Model profile assignments for fair language-to-model mapping
-
-**Multilingual Model Configurations**
-- `htr_latin_multilingual.yaml`: Shared Latin model for 35+ languages
-- `htr_cyrillic_multilingual.yaml`: Russian, Ukrainian, Bulgarian, Serbian
-- `htr_arabic_multilingual.yaml`: Arabic, Persian, Urdu (RTL)
-- `htr_georgian.yaml`: Specialized Georgian script model
-- `htr_armenian.yaml`: Specialized Armenian script model
-- `htr_cjk_multilingual.yaml`: Chinese, Japanese, Korean
-- `htr_indic_multilingual.yaml`: Hindi, Bengali, Tamil, Telugu, etc.
-
-**Advanced Decoders**
-- Transformer-based attention decoder with beam search inference
-- CTC decoder with language model integration and beam search
-- Configurable BeamSearchConfig with alpha/beta coefficients
-
-**Model Architectures**
-- ResNet variants (resnet18, resnet34, resnet_small, resnet_tiny)
-- Lightweight CNN backbone with depthwise separable convolutions
-- Vision Transformer (ViT) backbone with patch embedding
-- Hybrid CNN-ViT backbone
-- BiLSTM, stacked LSTM, and LSTM with attention heads
-- Transformer and Conformer sequence heads
-
-**Language Models**
-- Neural character language model (LSTM and Transformer variants)
-- Character-level n-gram LM with smoothing (add-k, interpolation, backoff)
-- Word-level n-gram LM
-- Incremental scoring for efficient beam search
-
-**Benchmarking Suite**
-- `BenchmarkConfig` and `BenchmarkResult` dataclasses
-- Per-language metric aggregation
-- Latency and throughput measurement
-- Report generation (Markdown, CSV, JSON, HTML)
-- Comparison utilities across models
-
-**Error Analysis**
-- Character confusion matrix generation
-- Edit operation classification (substitution, deletion, insertion)
-- Per-language error aggregation
-- Common error pattern identification
-
-**Noise Injection**
-- Gaussian and salt-and-pepper noise
-- Blur and JPEG compression artifacts
-- Random occlusions
-- Resolution degradation
-
-**Training Configurations**
-- `htr_latin_multilingual.yaml` training config
-- Fine-tuning template for per-language optimization
-- Low-resource transfer learning config
-
-**Examples**
-- `recognize_scandinavian.py`: Nordic languages demo
-- `recognize_caucasus.py`: Caucasus region demo
-- `recognize_baltic.py`: Baltic languages demo
-- `recognize_multilingual.py`: Full 52+ language demo
-
-**Documentation**
-- Comprehensive `docs/evaluation/benchmarks.md` with per-language results
-- Fairness metrics (CER variance, standard deviation)
-- Theoretical foundations in `docs/theory/htr_foundations.md`
+- Language profiles for 52+ languages
+- Model profile field in LanguageProfile dataclass
+- Multilingual model configurations (Latin, Cyrillic, Arabic, Georgian, Armenian, CJK, Indic)
+- Training configurations for multilingual and fine-tuning workflows
+- Per-region example scripts
+- Comprehensive test suite for language profiles
+- Benchmark documentation with fairness metrics
 
 ### Changed
-- Updated to Beta status (Development Status :: 4 - Beta)
-- Version bumped to 0.2.0
-- Expanded PyPI classifiers for better discoverability
-- Added `editdistance` to core dependencies
 
-### Fixed
-- Language profile validation for all 52 languages
-- Model profile field added to LanguageProfile dataclass
+- Version upgraded to 0.2.0 (Beta)
+- Added `editdistance` to core dependencies
 
 ---
 
 ## [0.1.0] - 2024-11-15
 
 ### Added
+
 - Initial release of Thulium
 - Core HTR pipeline with preprocessing, segmentation, and recognition
 - Basic CNN backbone and LSTM sequence modeling
@@ -103,5 +96,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic documentation and README
 
 ### Notes
+
 - Alpha release - APIs subject to change
 - Focus on English and Western European languages

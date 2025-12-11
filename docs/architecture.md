@@ -1,160 +1,405 @@
-# Architecture Overview
+# Thulium Architecture
 
-Thulium is designed as a modular, extensible library for handwritten text recognition (HTR). The architecture separates concerns into well-defined layers, enabling researchers and engineers to customize individual components while maintaining system coherence.
+## System Overview
 
-## System Architecture
+Thulium implements a layered architecture for handwritten text recognition, designed for modularity, extensibility, and production reliability.
+
+---
+
+## High-Level Architecture
 
 ```mermaid
-graph TD
-    subgraph "Data Layer"
-        A[Data Loaders] --> B[Transforms]
-        B --> C[Language Profiles]
+graph TB
+    subgraph Input["Input Layer"]
+        I1[Document Image]
+        I2[PDF Document]
+        I3[Batch Images]
     end
     
-    subgraph "Model Layer"
-        D[Backbones<br/>CNN / ViT] --> E[Sequence Heads<br/>BiLSTM / Transformer]
-        E --> F[Decoders<br/>CTC / Attention]
-        F --> G[Language Models]
+    subgraph Data["Data Layer"]
+        D1[Image Loader]
+        D2[PDF Processor]
+        D3[Transform Pipeline]
+        D4[Language Profile Registry]
     end
     
-    subgraph "Pipeline Layer"
-        H[Segmentation] --> I[Recognition]
-        I --> J[Multi-language Router]
+    subgraph Preprocessing["Preprocessing Layer"]
+        P1[Normalization]
+        P2[Binarization]
+        P3[Deskewing]
+        P4[Noise Reduction]
     end
     
-    subgraph "Evaluation Layer"
-        K[Metrics] --> L[Benchmarking]
-        L --> M[Reporting]
+    subgraph Segmentation["Segmentation Layer"]
+        S1[Layout Analysis]
+        S2[Line Detection]
+        S3[Word Segmentation]
     end
     
-    C --> H
-    J --> K
-    G --> J
+    subgraph Recognition["Recognition Layer"]
+        R1[Feature Extraction]
+        R2[Sequence Modeling]
+        R3[Output Decoding]
+    end
+    
+    subgraph LM["Language Modeling"]
+        L1[N-gram LM]
+        L2[Neural LM]
+        L3[Beam Rescoring]
+    end
+    
+    subgraph Output["Output Layer"]
+        O1[Structured Result]
+        O2[Confidence Scores]
+        O3[Export Formats]
+    end
+    
+    I1 --> D1
+    I2 --> D2
+    I3 --> D1
+    D1 --> D3
+    D2 --> D3
+    D3 --> P1
+    D4 -.-> R3
+    
+    P1 --> P2 --> P3 --> P4
+    P4 --> S1 --> S2 --> S3
+    S3 --> R1 --> R2 --> R3
+    R3 --> L3
+    L1 --> L3
+    L2 --> L3
+    L3 --> O1
+    O1 --> O2 --> O3
 ```
 
 ---
 
-## 1. Data Layer (`thulium.data`)
+## Module Structure
 
-The data layer handles all input processing and language-specific configuration.
+| Module | Path | Responsibility |
+|:-------|:-----|:---------------|
+| API | `thulium.api` | High-level recognition interface |
+| Data | `thulium.data` | Data loading, transforms, language profiles |
+| Models | `thulium.models` | Neural network architectures |
+| Pipeline | `thulium.pipeline` | End-to-end processing orchestration |
+| Evaluation | `thulium.evaluation` | Metrics, benchmarking, reporting |
+| XAI | `thulium.xai` | Explainability and error analysis |
+| CLI | `thulium.cli` | Command-line interface |
 
-### Components
+---
 
-| Component | Module | Description |
-| :--- | :--- | :--- |
-| **Loaders** | `loaders.py` | Ingest images (PNG, JPEG) and PDFs via `pdf2image` |
-| **Transforms** | `transforms.py` | Resize, pad, normalize, and augment images for model input |
-| **Language Profiles** | `language_profiles.py` | Central registry of alphabets, tokenizers, and decoder configs for 50+ languages |
+## Data Layer
+
+### Component Hierarchy
+
+```mermaid
+classDiagram
+    class DataLoader {
+        +load_image(path) Image
+        +load_batch(paths) List~Image~
+    }
+    
+    class PDFProcessor {
+        +extract_pages(path) List~Image~
+        +get_metadata(path) Dict
+    }
+    
+    class TransformPipeline {
+        +transforms: List~Transform~
+        +apply(image) Tensor
+    }
+    
+    class LanguageProfile {
+        +code: str
+        +name: str
+        +script: str
+        +alphabet: List~str~
+        +direction: str
+        +model_profile: str
+    }
+    
+    DataLoader --> TransformPipeline
+    PDFProcessor --> TransformPipeline
+    TransformPipeline --> LanguageProfile
+```
 
 ### Language Profile Schema
 
-Each language profile encapsulates:
+Each supported language is defined by a `LanguageProfile` dataclass:
 
-- **Character Set**: Complete alphabet including script-specific characters
-- **Script Type**: Latin, Cyrillic, Arabic, Devanagari, Georgian, Armenian, etc.
-- **Directionality**: LTR (left-to-right) or RTL (right-to-left)
-- **Tokenization Strategy**: Character-level, BPE, or word-level
-- **Decoder Configuration**: Default decoder type and language model linkage
+| Field | Type | Description |
+|:------|:-----|:------------|
+| `code` | str | ISO 639-1 code |
+| `name` | str | Human-readable name |
+| `script` | str | Writing system |
+| `alphabet` | List[str] | Character set |
+| `direction` | str | LTR or RTL |
+| `region` | str | Geographic region |
+| `model_profile` | str | Default model config |
+| `tokenizer_type` | str | char, bpe, or word |
+| `default_decoder` | str | Decoder variant |
 
 ---
 
-## 2. Model Layer (`thulium.models`)
+## Model Layer
 
-PyTorch-based implementations of neural network components for sequence modeling.
-
-### Model Component Hierarchy
+### Architecture Variants
 
 ```mermaid
 graph LR
-    A[Input Image] --> B[Backbone]
-    B --> C[Sequence Head]
-    C --> D[Decoder]
+    subgraph Backbones
+        B1[ResNet-18]
+        B2[ResNet-34]
+        B3[ViT-Base]
+        B4[Hybrid CNN-ViT]
+    end
+    
+    subgraph Sequence
+        S1[BiLSTM]
+        S2[Transformer]
+        S3[Conformer]
+    end
+    
+    subgraph Decoders
+        D1[CTC Greedy]
+        D2[CTC Beam]
+        D3[Attention Seq2Seq]
+    end
+    
+    B1 --> S1
+    B2 --> S2
+    B3 --> S2
+    B4 --> S3
+    
+    S1 --> D1
+    S1 --> D2
+    S2 --> D2
+    S2 --> D3
+    S3 --> D2
+    S3 --> D3
+```
+
+### Backbone Architectures
+
+#### Convolutional Neural Networks
+
+ResNet-based feature extraction with asymmetric pooling for text line images:
+
+```
+Input: (B, C, H, W)
+  --> Conv Layers --> Residual Blocks --> Pooling
+Output: (B, C', H', W')
+```
+
+Feature map dimensions are computed as:
+
+```
+H' = H / s_h
+W' = W / s_w
+```
+
+Where s_h and s_w are the total vertical and horizontal strides.
+
+#### Vision Transformer
+
+Patch-based encoding with positional embeddings:
+
+```
+Input: (B, C, H, W)
+  --> Patch Embedding --> Positional Encoding --> Transformer Blocks
+Output: (B, N, D)
+```
+
+Patch sequence length:
+
+```
+N = (H / P_h) * (W / P_w)
+```
+
+Where P_h and P_w are patch dimensions.
+
+### Sequence Heads
+
+#### BiLSTM
+
+Bidirectional LSTM for sequential feature modeling:
+
+```mermaid
+graph LR
+    A[Feature Sequence] --> B[Forward LSTM]
+    A --> C[Backward LSTM]
+    B --> D[Concatenate]
+    C --> D
     D --> E[Output Sequence]
 ```
 
-### Component Variants
+#### Transformer
 
-| Component | Type | Description |
-| :--- | :--- | :--- |
-| **Backbone** | CNN (ResNet) | Convolutional feature extraction |
-| **Backbone** | ViT | Vision Transformer for global attention |
-| **Sequence Head** | BiLSTM | Bidirectional recurrent modeling |
-| **Sequence Head** | Transformer | Self-attention sequence modeling |
-| **Decoder** | CTC | Connectionist Temporal Classification |
-| **Decoder** | Attention | Autoregressive sequence decoding |
-
-### CTC Loss Function
-
-The Connectionist Temporal Classification (CTC) loss enables alignment-free training:
+Self-attention based sequence modeling:
 
 ```
-L_CTC = -ln p(y | x)
+Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) V
 ```
 
-Where `p(y | x)` marginalizes over all valid alignments between the input sequence `x` and target sequence `y`. The CTC algorithm uses dynamic programming to efficiently compute the sum over exponentially many paths.
+Multi-head attention with positional encoding:
+
+```
+MultiHead(Q, K, V) = Concat(head_1, ..., head_h) W^O
+head_i = Attention(QW_i^Q, KW_i^K, VW_i^V)
+```
+
+### Decoders
+
+#### CTC Decoder
+
+Connectionist Temporal Classification enables alignment-free training:
+
+```
+P(y|x) = sum_{pi in B^{-1}(y)} P(pi|x)
+```
+
+Where B is the many-to-one mapping that removes blanks and repeated characters.
+
+**Beam Search** maintains top-k hypotheses with optional language model rescoring:
+
+```
+score(h) = log P(h|x) + alpha * log P_LM(h) + beta * |h|
+```
+
+#### Attention Decoder
+
+Autoregressive sequence generation with cross-attention:
+
+```mermaid
+sequenceDiagram
+    participant E as Encoder
+    participant D as Decoder
+    participant O as Output
+    
+    E->>D: Encoded Features
+    loop For each step
+        D->>D: Self-Attention
+        D->>E: Cross-Attention
+        D->>O: Predict Next Token
+        O->>D: Feed Back
+    end
+```
 
 ---
 
-## 3. Pipeline Layer (`thulium.pipeline`)
+## Pipeline Layer
 
-Orchestrates the complete workflow from raw input to structured output.
-
-### Pipeline Flow
+### Pipeline Architecture
 
 ```mermaid
-flowchart LR
-    A[Raw Image] --> B[Preprocessing<br/>Normalize, Binarize]
-    B --> C[Segmentation<br/>Line Detection]
-    C --> D[Recognition<br/>HTR Model]
-    D --> E[Decoding<br/>CTC / Beam Search]
-    E --> F[Postprocessing<br/>Unicode Normalization]
-    F --> G[PageResult]
+flowchart TB
+    subgraph Input
+        A[Raw Image]
+    end
+    
+    subgraph Preprocessing
+        B1[Resize]
+        B2[Normalize]
+        B3[Binarize]
+    end
+    
+    subgraph Segmentation
+        C1[Layout Analysis]
+        C2[Line Extraction]
+        C3[Word Segmentation]
+    end
+    
+    subgraph Recognition
+        D1[Feature Extraction]
+        D2[Sequence Modeling]
+        D3[Decoding]
+    end
+    
+    subgraph Postprocessing
+        E1[Unicode Normalization]
+        E2[Spell Check]
+        E3[Format Output]
+    end
+    
+    A --> B1 --> B2 --> B3
+    B3 --> C1 --> C2 --> C3
+    C3 --> D1 --> D2 --> D3
+    D3 --> E1 --> E2 --> E3
 ```
-
-### Pipeline Types
-
-| Pipeline | Module | Purpose |
-| :--- | :--- | :--- |
-| **HTR Pipeline** | `htr_pipeline.py` | Core handwriting recognition |
-| **Segmentation Pipeline** | `segmentation_pipeline.py` | Layout analysis and line extraction |
-| **Form Pipeline** | `form_pipeline.py` | Structured form processing |
-| **Multi-language Pipeline** | `multi_language_pipeline.py` | Language detection and routing |
 
 ### Configuration System
 
-Pipelines are configured via YAML files supporting:
+Pipelines are fully specified through YAML configuration:
 
-- Model architecture selection
-- Preprocessing parameters
-- Decoder settings
-- Language profile references
+```yaml
+pipeline:
+  name: htr_default
+  
+  preprocessing:
+    target_height: 64
+    normalize: true
+    binarize: false
+    
+  model:
+    backbone: resnet34
+    sequence_head: transformer
+    decoder: ctc_beam
+    
+  decoding:
+    beam_width: 20
+    lm_alpha: 0.5
+    lm_beta: 0.1
+    
+  language:
+    profile: en
+```
 
 ---
 
-## 4. API Layer (`thulium.api`)
+## Evaluation Layer
 
-Exposes high-level functionality for end-users.
+### Metrics Framework
 
-### Public Functions
+```mermaid
+graph LR
+    subgraph Inputs
+        A[References]
+        B[Hypotheses]
+    end
+    
+    subgraph Metrics
+        C[CER]
+        D[WER]
+        E[SER]
+    end
+    
+    subgraph Analysis
+        F[Edit Operations]
+        G[Confusion Matrix]
+        H[Error Categories]
+    end
+    
+    subgraph Output
+        I[Benchmark Report]
+    end
+    
+    A --> C
+    B --> C
+    A --> D
+    B --> D
+    A --> E
+    B --> E
+    
+    C --> F
+    D --> G
+    E --> H
+    
+    F --> I
+    G --> I
+    H --> I
+```
 
-| Function | Description |
-| :--- | :--- |
-| `recognize_image()` | Recognize text in a single image |
-| `recognize_pdf()` | Process all pages of a PDF document |
-| `recognize_batch()` | Batch processing for multiple images |
-
-### Return Types
-
-- **PageResult**: Container for recognized text, line objects, confidence scores, and metadata
-- **Line**: Individual text line with bounding box and confidence
-
----
-
-## 5. Evaluation Layer (`thulium.evaluation`)
-
-Tools for assessing and comparing model performance.
-
-### Metrics
+### Metric Definitions
 
 **Character Error Rate (CER)**:
 
@@ -163,10 +408,10 @@ CER = (S + D + I) / N
 ```
 
 Where:
-- S = Number of character substitutions
-- D = Number of character deletions
-- I = Number of character insertions
-- N = Total characters in reference
+- S = substitutions
+- D = deletions
+- I = insertions
+- N = reference length
 
 **Word Error Rate (WER)**:
 
@@ -174,45 +419,87 @@ Where:
 WER = (S_w + D_w + I_w) / N_w
 ```
 
-Applied at the word level rather than character level.
+Applied at word-level tokenization.
 
-**Sequence Error Rate (SER)**:
+**Cross-Language Fairness**:
 
 ```
-SER = 1 if reference != hypothesis else 0
+Delta_CER = max_l(CER_l) - min_l(CER_l)
+Sigma_CER = sqrt(1/L * sum_l(CER_l - mean_CER)^2)
 ```
-
-Binary indicator of exact match.
-
-### Benchmarking
-
-The benchmarking module supports:
-
-- Dataset-level evaluation
-- Cross-language comparison
-- Model variant comparison
-- Latency profiling
 
 ---
 
-## 6. Explainability Layer (`thulium.xai`)
+## XAI Layer
 
-Tools for understanding model behavior and debugging recognition errors.
+### Explainability Components
 
-### Components
-
-| Component | Module | Description |
-| :--- | :--- | :--- |
-| **Attention Maps** | `attention_maps.py` | Visualize model attention patterns |
-| **Confidence Analysis** | `confidence_analysis.py` | Analyze per-character confidence scores |
-| **Error Analysis** | `error_analysis.py` | Categorize and diagnose recognition errors |
+```mermaid
+graph TB
+    subgraph Model
+        A[Recognition Model]
+    end
+    
+    subgraph Attention
+        B1[Encoder Attention]
+        B2[Decoder Attention]
+        B3[Cross Attention]
+    end
+    
+    subgraph Analysis
+        C1[Attention Visualization]
+        C2[Confidence Heatmap]
+        C3[Error Localization]
+    end
+    
+    subgraph Output
+        D[Explainability Report]
+    end
+    
+    A --> B1
+    A --> B2
+    A --> B3
+    
+    B1 --> C1
+    B2 --> C2
+    B3 --> C3
+    
+    C1 --> D
+    C2 --> D
+    C3 --> D
+```
 
 ---
 
 ## Design Principles
 
-1. **Modularity**: Each component can be replaced or extended independently
-2. **Configurability**: YAML-based configuration for reproducibility
-3. **Type Safety**: Comprehensive type hints throughout the codebase
-4. **Testability**: Designed for unit and integration testing
-5. **Language Extensibility**: Adding new languages requires only profile definition
+| Principle | Implementation |
+|:----------|:---------------|
+| **Modularity** | Components are independently replaceable |
+| **Configurability** | YAML-based specification for reproducibility |
+| **Type Safety** | Comprehensive type hints throughout |
+| **Testability** | Unit and integration test coverage |
+| **Extensibility** | New languages require only profile definition |
+| **Performance** | Optimized inference with batching support |
+
+---
+
+## Technology Stack
+
+| Component | Technology |
+|:----------|:-----------|
+| Deep Learning | PyTorch 2.0+ |
+| Image Processing | Pillow, OpenCV |
+| PDF Processing | pdf2image |
+| CLI | Typer |
+| Configuration | PyYAML, Pydantic |
+| Testing | pytest |
+
+---
+
+## References
+
+1. Graves, A., et al. (2006). Connectionist temporal classification.
+2. Vaswani, A., et al. (2017). Attention is all you need.
+3. Dosovitskiy, A., et al. (2020). An image is worth 16x16 words.
+4. Gulati, A., et al. (2020). Conformer: Convolution-augmented Transformer.
