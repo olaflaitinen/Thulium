@@ -13,7 +13,7 @@
 
 **Thulium** is a production-grade, research-oriented Python framework for offline handwritten text recognition (HTR). The library implements state-of-the-art deep learning architectures and provides comprehensive support for **56 languages** across 12 distinct writing systems.
 
-> **Version 1.0.1**: Production-ready release with complete language parity, SoTA architectures, and comprehensive evaluation suite.
+> **Version 1.0.2**: Production-ready release with complete documentation and community standards.
 
 ---
 

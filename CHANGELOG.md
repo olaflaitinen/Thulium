@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.2] - 2024-12-11
+
+### Added
+
+- `CODE_OF_CONDUCT.md` for community standards
+- `GITHUB_METADATA.md` for repository configuration
+- `docs/api/api_reference.md` unified API index
+
+### Changed
+
+- Updated `CONTRIBUTING.md` with comprehensive guidelines
+
+---
+
 ## [1.0.1] - 2024-12-11
 
 ### Changed
