@@ -1,0 +1,71 @@
+# Multilingual Cyrillic Script Model Configuration
+#
+# This model handles Cyrillic-based writing systems including:
+# - Russian (primary baseline)
+# - Ukrainian (with specific characters i, yi, ie, g with upturn)
+# - Bulgarian
+# - Serbian (Cyrillic script variant)
+#
+# The model is optimized for the shared Cyrillic character set while
+# maintaining accuracy for language-specific orthographic patterns.
+
+model:
+  name: "htr_cyrillic_multilingual"
+  version: "1.0.0"
+  description: "Multilingual Cyrillic script HTR model"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet34"
+    in_channels: 3
+    dropout: 0.1
+    
+  sequence_head:
+    type: "transformer"
+    hidden_size: 512
+    num_heads: 8
+    num_layers: 6
+    dim_feedforward: 2048
+    dropout: 0.1
+    
+  decoder:
+    type: "ctc"
+    blank_index: 0
+    
+  vocabulary:
+    script: "cyrillic"
+    include_russian: true
+    include_ukrainian: true
+    include_serbian: true
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.0003
+    weight_decay: 0.05
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 10
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 5
+    elastic_distortion:
+      probability: 0.4
+      
+languages:
+  supported:
+    - ru  # Russian
+    - uk  # Ukrainian
+    - bg  # Bulgarian
+    - sr  # Serbian (Cyrillic)
+      
+decoding:
+  method: "beam_search"
+  beam_width: 20

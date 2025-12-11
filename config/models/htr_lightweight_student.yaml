@@ -1,0 +1,93 @@
+# HTR Model Configuration: Lightweight Student Model
+#
+# This configuration defines a lightweight model designed for:
+# - Knowledge distillation from larger teacher models
+# - CPU-only deployment environments
+# - Mobile and embedded applications
+# - Low-latency inference requirements
+#
+# The model uses depthwise separable convolutions and reduced
+# dimensions to minimize computational requirements while
+# maintaining acceptable accuracy through distillation.
+#
+# Architecture: Lightweight CNN -> Small BiLSTM -> CTC Decoder
+#
+# Training approach:
+# 1. Train a large teacher model (e.g., htr_cnn_transformer_ctc)
+# 2. Use this student model with distillation loss
+# 3. Combined loss: alpha * CTC_loss + (1-alpha) * KL_divergence
+
+model:
+  name: "htr_lightweight_student"
+  version: "1.0.0"
+  
+  backbone:
+    type: "lightweight_cnn"
+    base_channels: 32
+    output_channels: 128
+    
+  sequence_head:
+    type: "bilstm"
+    hidden_size: 128
+    num_layers: 1
+    dropout: 0.2
+    bidirectional: true
+    
+  decoder:
+    type: "ctc"
+    blank_index: 0
+    
+  height_projection:
+    type: "mean_pool"
+    
+preprocessing:
+  image_height: 48  # Smaller input for efficiency
+  normalize: true
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  
+training:
+  # Standard training parameters (baseline)
+  optimizer:
+    type: "adamw"
+    lr: 0.002
+    weight_decay: 0.01
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 5
+    min_lr: 0.0001
+    
+  loss:
+    type: "ctc"
+    blank: 0
+    
+  regularization:
+    dropout: 0.2
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 2
+      translate: [0.01, 0.01]
+    noise:
+      gaussian_std: 0.01
+      probability: 0.1
+
+# Distillation-specific configuration
+distillation:
+  enabled: false  # Set to true when distilling from teacher
+  teacher_checkpoint: null  # Path to teacher model checkpoint
+  temperature: 4.0
+  alpha: 0.5  # Weight for distillation loss vs ground truth loss
+  loss_type: "kl_divergence"
+  
+decoding:
+  method: "greedy"  # Use greedy for speed
+  beam_width: 5
+  
+# Efficiency metrics (approximate)
+efficiency:
+  target_latency_ms: 50  # Target inference time per line
+  target_params_m: 2.0  # Target parameter count in millions
+  target_flops_g: 0.5  # Target FLOPs in billions

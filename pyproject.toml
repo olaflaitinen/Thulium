@@ -4,25 +4,43 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thulium"
-version = "0.1.0"
-description = "Multilingual Handwriting Intelligence for Python"
+version = "0.2.0"
+description = "Thulium - State-of-the-art Multilingual Handwriting Text Recognition for Python"
 readme = "README.md"
 authors = [
   { name = "Thulium Contributors", email = "opensource@thulium.ai" },
 ]
 license = { file = "LICENSE" }
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Text Processing :: General",
+    "Topic :: Text Processing :: Linguistic",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Natural Language :: German",
+    "Natural Language :: French",
+    "Natural Language :: Russian",
+    "Natural Language :: Arabic",
+    "Natural Language :: Chinese (Simplified)",
+    "Natural Language :: Japanese",
+    "Natural Language :: Korean",
 ]
-keywords = ["handwriting", "ocr", "htr", "multilingual", "deep-learning", "pytorch"]
+keywords = [
+    "handwriting", "ocr", "htr", "text-recognition",
+    "multilingual", "deep-learning", "pytorch",
+    "ctc", "transformer", "computer-vision",
+    "document-analysis", "historical-documents",
+]
 requires-python = ">=3.10"
 dependencies = [
     "torch>=2.0.0",
@@ -37,6 +55,7 @@ dependencies = [
     "opencv-python-headless>=4.0.0",
     "scikit-learn>=1.0.0",
     "structlog>=23.0.0",
+    "editdistance>=0.6.0",
 ]
 
 [project.optional-dependencies]

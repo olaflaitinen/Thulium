@@ -53,6 +53,7 @@ class LanguageProfile:
         alphabet: List of characters used in the language.
         direction: Text direction ('LTR' or 'RTL').
         region: Geographic or linguistic region for grouping.
+        model_profile: Model configuration to use (e.g., 'htr_latin_multilingual').
         special_tokens: Reserved tokens for sequence modeling.
         tokenizer_type: Tokenization strategy ('char', 'bpe', 'word').
         default_decoder: Default decoder type ('ctc_greedy', 'ctc_beam', 'attention').
@@ -66,6 +67,7 @@ class LanguageProfile:
     alphabet: List[str]
     direction: str = "LTR"
     region: str = "Global"
+    model_profile: str = "htr_latin_multilingual"
     special_tokens: List[str] = field(
         default_factory=lambda: ["<PAD>", "<UNK>", "<SOS>", "<EOS>", "<BLK>"]
     )

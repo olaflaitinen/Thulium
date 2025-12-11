@@ -1,0 +1,116 @@
+# Multilingual Latin Script Model Configuration
+#
+# This model is trained on diverse Latin-script languages and serves as
+# the shared base model for:
+# - Western European: English, German, French, Spanish, Portuguese, Italian, Dutch
+# - Eastern European: Polish, Czech, Slovak, Hungarian, Romanian, Croatian, Slovenian
+# - Nordic: Norwegian, Swedish, Danish, Icelandic, Faroese, Finnish
+# - Baltic: Lithuanian, Latvian, Estonian
+# - Caucasus (Latin): Azerbaijani, Turkish
+# - Southeast Asian (Latin): Vietnamese, Indonesian, Malay
+# - African (Latin): Swahili, Afrikaans
+#
+# The model handles extended Latin characters with diacritics across all
+# supported languages. For optimal per-language performance, fine-tuning
+# on language-specific data is recommended.
+
+model:
+  name: "htr_latin_multilingual"
+  version: "1.0.0"
+  description: "Multilingual Latin script HTR model for 35+ languages"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet34"
+    in_channels: 3
+    dropout: 0.1
+    
+  sequence_head:
+    type: "transformer"
+    hidden_size: 512
+    num_heads: 8
+    num_layers: 6
+    dim_feedforward: 2048
+    dropout: 0.1
+    pos_encoding: "sinusoidal"
+    
+  decoder:
+    type: "ctc"
+    blank_index: 0
+    dropout: 0.1
+    
+  vocabulary:
+    # Extended Latin covering all supported languages
+    include_diacritics: true
+    include_extended_latin: true
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.0003
+    weight_decay: 0.05
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 10
+    
+  loss:
+    type: "ctc"
+    blank: 0
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 5
+      translate: [0.03, 0.03]
+    elastic_distortion:
+      probability: 0.4
+    noise:
+      gaussian_std: 0.02
+      
+languages:
+  supported:
+    - en  # English
+    - de  # German
+    - fr  # French
+    - es  # Spanish
+    - pt  # Portuguese
+    - it  # Italian
+    - nl  # Dutch
+    - pl  # Polish
+    - cs  # Czech
+    - sk  # Slovak
+    - hu  # Hungarian
+    - ro  # Romanian
+    - hr  # Croatian
+    - sl  # Slovenian
+    - nb  # Norwegian Bokmal
+    - nn  # Norwegian Nynorsk
+    - sv  # Swedish
+    - da  # Danish
+    - is  # Icelandic
+    - fo  # Faroese
+    - fi  # Finnish
+    - lt  # Lithuanian
+    - lv  # Latvian
+    - et  # Estonian
+    - az  # Azerbaijani
+    - tr  # Turkish
+    - vi  # Vietnamese
+    - id  # Indonesian
+    - ms  # Malay
+    - sw  # Swahili
+    - af  # Afrikaans
+    - sr-Latn  # Serbian (Latin)
+      
+decoding:
+  method: "beam_search"
+  beam_width: 20
+  lm_alpha: 0.5
+  lm_beta: 0.1

@@ -1,0 +1,99 @@
+# HTR Model Configuration: ViT + Transformer Decoder (Seq2Seq)
+#
+# This configuration implements a fully Transformer-based architecture
+# using Vision Transformer for image encoding and Transformer decoder
+# for autoregressive sequence generation. This seq2seq approach:
+# - Does not require monotonic alignment (unlike CTC)
+# - Can model complex output dependencies
+# - Handles non-standard writing directions more naturally
+#
+# Architecture: ViT Backbone -> Transformer Decoder (Seq2Seq)
+#
+# Suitable for:
+# - Complex scripts (Arabic, Devanagari, etc.)
+# - Cases where CTC assumptions are limiting
+# - Highest accuracy requirements with sufficient training data
+
+model:
+  name: "htr_vit_transformer_seq2seq"
+  version: "1.0.0"
+  
+  backbone:
+    type: "vit"
+    config_name: "vit_htr_base"
+    d_model: 512
+    num_heads: 8
+    num_layers: 8
+    patch_size: [16, 8]
+    dropout: 0.1
+    pos_encoding: "learnable"
+    
+  decoder:
+    type: "attention"
+    d_model: 256
+    encoder_dim: 512
+    num_heads: 8
+    num_layers: 4
+    dim_feedforward: 1024
+    dropout: 0.1
+    max_seq_len: 500
+    
+  # Special tokens
+  tokens:
+    pad_id: 0
+    sos_id: 1
+    eos_id: 2
+    unk_id: 3
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.0001
+    weight_decay: 0.05
+    betas: [0.9, 0.98]
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 15
+    min_lr: 0.0000001
+    
+  loss:
+    type: "cross_entropy"
+    label_smoothing: 0.1
+    ignore_index: 0  # Ignore padding
+    
+  regularization:
+    label_smoothing: 0.1
+    dropout: 0.1
+    stochastic_depth: 0.15
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 5
+      translate: [0.03, 0.03]
+      scale: [0.9, 1.1]
+    elastic_distortion:
+      alpha: 40
+      sigma: 7
+      probability: 0.5
+    random_erasing:
+      probability: 0.2
+      scale: [0.02, 0.1]
+      ratio: [0.3, 3.3]
+    mixup:
+      alpha: 0.2
+      probability: 0.3
+      
+decoding:
+  method: "beam_search"
+  beam_width: 5
+  length_penalty: 1.0
+  max_length: 300
+  early_stopping: true

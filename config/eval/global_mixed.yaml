@@ -1,0 +1,58 @@
+# Benchmark Configuration: Global Multilingual Mixed
+#
+# Comprehensive benchmark covering representative languages
+# from all major script families and regions.
+
+benchmark:
+  name: "global_multilingual"
+  description: "Global multilingual HTR benchmark across all major scripts"
+  
+  dataset:
+    type: "line_images"
+    path: "data/global"
+    split: "test"
+    format: "folder_per_language"
+  
+  languages:
+    # Western Europe - Latin
+    - en  # English
+    - de  # German
+    - fr  # French
+    - es  # Spanish
+    
+    # Eastern Europe - Cyrillic
+    - ru  # Russian
+    - uk  # Ukrainian
+    - bg  # Bulgarian
+    
+    # Middle East - RTL
+    - ar  # Arabic
+    - fa  # Persian
+    - he  # Hebrew
+    
+    # South Asia - Indic
+    - hi  # Hindi (Devanagari)
+    - bn  # Bengali
+    
+    # East Asia
+    - zh  # Chinese
+    - ja  # Japanese
+    - ko  # Korean
+    
+    # Caucasus - Mixed
+    - az  # Azerbaijani
+    - ka  # Georgian
+    - hy  # Armenian
+  
+  model_config: "config/models/htr_vit_transformer_seq2seq.yaml"
+  
+  decoding:
+    method: "beam_search"
+    beam_width: 10
+    length_penalty: 1.0
+    max_length: 300
+  
+  device: "auto"
+  num_samples: null
+  batch_size: 4
+  seed: 42

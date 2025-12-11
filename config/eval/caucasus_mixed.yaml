@@ -1,0 +1,35 @@
+# Benchmark Configuration: Caucasus Region Mixed
+#
+# Evaluates HTR performance across Caucasus region languages  
+# including Azerbaijani, Georgian, Armenian, and Turkish.
+# This benchmark tests multi-script capabilities.
+
+benchmark:
+  name: "caucasus_mixed"
+  description: "Caucasus region languages HTR benchmark with mixed scripts"
+  
+  dataset:
+    type: "line_images"
+    path: "data/caucasus"
+    split: "test"
+    format: "folder_per_language"
+  
+  languages:
+    - az  # Azerbaijani (Latin script)
+    - tr  # Turkish (Latin script)
+    - ka  # Georgian (Mkhedruli script)
+    - hy  # Armenian (Armenian script)
+  
+  model_config: "config/pipelines/htr_multi_latin.yaml"
+  
+  decoding:
+    method: "beam_search"
+    beam_width: 20
+    lm_alpha: 0.7
+    lm_beta: 0.2
+    length_normalization: true
+  
+  device: "auto"
+  num_samples: null
+  batch_size: 8
+  seed: 42

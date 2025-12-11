@@ -1,0 +1,63 @@
+# Armenian Script Model Configuration
+#
+# Specialized model for Armenian language using the Armenian alphabet.
+# Armenian has 39 letters in the Eastern Armenian variant. This model
+# is tailored specifically for Armenian handwriting recognition.
+#
+# Note: Armenian is a low-resource language for HTR. Transfer learning
+# with fine-tuning on Armenian data is recommended.
+
+model:
+  name: "htr_armenian"
+  version: "1.0.0"
+  description: "Specialized Armenian script HTR model"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet18"
+    in_channels: 3
+    dropout: 0.2
+    
+  sequence_head:
+    type: "bilstm"
+    hidden_size: 256
+    num_layers: 2
+    dropout: 0.3
+    
+  decoder:
+    type: "ctc"
+    blank_index: 0
+    
+  vocabulary:
+    script: "armenian"
+    alphabet_size: 39
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.001
+    weight_decay: 0.01
+    
+  transfer_learning:
+    enabled: true
+    pretrained_model: "htr_latin_multilingual"
+    freeze_backbone_epochs: 5
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 7
+    elastic_distortion:
+      probability: 0.5
+      
+languages:
+  supported:
+    - hy  # Armenian
+    
+decoding:
+  method: "beam_search"
+  beam_width: 15

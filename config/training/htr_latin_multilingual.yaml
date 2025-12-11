@@ -1,0 +1,92 @@
+# Training Configuration: Multilingual Latin Model
+#
+# This config defines training parameters for the shared Latin script
+# multilingual model supporting 35+ languages.
+
+training:
+  name: "htr_latin_multilingual_train"
+  description: "Train multilingual Latin HTR model"
+  
+  model_config: "config/models/htr_latin_multilingual.yaml"
+  
+  # Data configuration
+  data:
+    train_datasets:
+      - name: "iam"
+        path: "data/iam/train"
+        language: "en"
+        weight: 1.0
+      - name: "rimes"
+        path: "data/rimes/train"
+        language: "fr"
+        weight: 1.0
+      # Add more datasets per language
+      
+    val_datasets:
+      - name: "iam_val"
+        path: "data/iam/val"
+        language: "en"
+        
+    batch_size: 32
+    num_workers: 4
+    shuffle: true
+    
+  # Optimizer
+  optimizer:
+    type: "adamw"
+    lr: 0.0003
+    betas: [0.9, 0.98]
+    weight_decay: 0.05
+    
+  # Learning rate scheduler
+  scheduler:
+    type: "cosine_warmup"
+    warmup_epochs: 10
+    min_lr: 0.00001
+    
+  # Training parameters
+  epochs: 100
+  gradient_clip: 1.0
+  mixed_precision: true
+  
+  # Regularization
+  regularization:
+    dropout: 0.1
+    label_smoothing: 0.1
+    
+  # Data augmentation
+  augmentation:
+    random_affine:
+      enabled: true
+      degrees: 5
+      translate: [0.03, 0.03]
+    elastic_distortion:
+      enabled: true
+      probability: 0.4
+      alpha: 2.0
+      sigma: 0.5
+    noise:
+      enabled: true
+      gaussian_std: 0.02
+      probability: 0.3
+    color_jitter:
+      enabled: true
+      brightness: 0.1
+      contrast: 0.1
+      
+  # Checkpointing
+  checkpoints:
+    save_every: 5
+    save_best: true
+    metric: "val_cer"
+    mode: "min"
+    
+  # Logging
+  logging:
+    log_every: 100
+    use_tensorboard: true
+    use_wandb: false
+    
+  # Hardware
+  device: "auto"
+  seed: 42

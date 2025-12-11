@@ -1,0 +1,72 @@
+# Training Configuration: Language Fine-tuning Template
+#
+# This template defines training parameters for fine-tuning a pretrained
+# multilingual model on a specific language. Use this to achieve optimal
+# per-language accuracy.
+
+training:
+  name: "htr_finetune_${LANGUAGE}"
+  description: "Fine-tune pretrained model for ${LANGUAGE}"
+  
+  # Base model to fine-tune from
+  pretrained_model:
+    path: "checkpoints/htr_latin_multilingual_best.pt"
+    freeze_backbone_epochs: 5
+    
+  model_config: "config/models/htr_latin_multilingual.yaml"
+  
+  # Language-specific data
+  data:
+    train_datasets:
+      - name: "${LANGUAGE}_train"
+        path: "data/${LANGUAGE}/train"
+        language: "${LANGUAGE}"
+        weight: 1.0
+        
+    val_datasets:
+      - name: "${LANGUAGE}_val"
+        path: "data/${LANGUAGE}/val"
+        language: "${LANGUAGE}"
+        
+    batch_size: 16
+    num_workers: 4
+    
+  # Lower learning rate for fine-tuning
+  optimizer:
+    type: "adamw"
+    lr: 0.0001  # Lower than pretraining
+    weight_decay: 0.01
+    
+  scheduler:
+    type: "cosine_warmup"
+    warmup_epochs: 2
+    
+  epochs: 30
+  gradient_clip: 1.0
+  mixed_precision: true
+  
+  # Stronger regularization to prevent overfitting
+  regularization:
+    dropout: 0.2
+    label_smoothing: 0.1
+    
+  # More aggressive augmentation for small datasets
+  augmentation:
+    random_affine:
+      enabled: true
+      degrees: 7
+      translate: [0.05, 0.05]
+    elastic_distortion:
+      enabled: true
+      probability: 0.5
+    noise:
+      enabled: true
+      gaussian_std: 0.03
+      probability: 0.4
+      
+  checkpoints:
+    save_best: true
+    metric: "val_cer"
+    
+  device: "auto"
+  seed: 42

@@ -1,0 +1,76 @@
+# Multilingual Arabic Script Model Configuration
+#
+# This model handles Arabic script-based writing systems including:
+# - Arabic (Modern Standard Arabic and regional variants)
+# - Persian (Farsi) with additional characters
+# - Urdu with Nastaliq-influenced forms
+#
+# Key considerations:
+# - Right-to-left text direction
+# - Contextual letter forms (initial, medial, final, isolated)
+# - Diacritical marks (harakat)
+
+model:
+  name: "htr_arabic_multilingual"
+  version: "1.0.0"
+  description: "Multilingual Arabic script HTR model for RTL languages"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet34"
+    in_channels: 3
+    dropout: 0.1
+    
+  sequence_head:
+    type: "transformer"
+    hidden_size: 512
+    num_heads: 8
+    num_layers: 6
+    dropout: 0.1
+    
+  decoder:
+    type: "attention"  # Attention better for RTL and complex scripts
+    d_model: 256
+    num_heads: 8
+    num_layers: 4
+    
+  vocabulary:
+    script: "arabic"
+    include_persian: true
+    include_urdu: true
+    include_diacritics: true
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  # Note: Images may need horizontal flip normalization for RTL
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.0002
+    weight_decay: 0.05
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 15
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 3
+    elastic_distortion:
+      probability: 0.3
+      
+languages:
+  supported:
+    - ar  # Arabic
+    - fa  # Persian (Farsi)
+    - ur  # Urdu
+    
+  direction: "RTL"
+      
+decoding:
+  method: "beam_search"
+  beam_width: 10
+  length_penalty: 1.0

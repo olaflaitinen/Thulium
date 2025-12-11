@@ -1,4 +1,4 @@
-# Thulium - Multilingual Handwriting Intelligence for Python
+# Thulium - State-of-the-Art Multilingual Handwriting Text Recognition for Python
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/olaflaitinen/Thulium/ci.yml?branch=main)](https://github.com/olaflaitinen/Thulium/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/olaflaitinen/Thulium)](https://codecov.io/gh/olaflaitinen/Thulium)
@@ -13,9 +13,9 @@
 
 ---
 
-**Thulium** is a state-of-the-art, open-source Python library for offline handwritten text recognition (HTR) and document intelligence. Engineered for high-performance research and production deployments, Thulium provides an end-to-end processing stack from document layout analysis to language-model-enhanced decoding across **50+ languages**, with comprehensive support for Latin, Cyrillic, Arabic, Devanagari, and other major world scripts.
+**Thulium** is a state-of-the-art, open-source Python library for offline handwritten text recognition (HTR) and document intelligence. Engineered for high-performance research and production deployments, Thulium provides an end-to-end processing stack from document layout analysis to language-model-enhanced decoding across **52+ languages**, with comprehensive support for Latin, Cyrillic, Arabic, Devanagari, Georgian, Armenian, and other major world scripts.
 
-> **Note**: Thulium is currently in alpha status. APIs are subject to change prior to the 1.0 release.
+> **Version 0.2.0 (Beta)**: Language parity release with first-class support for all 52+ languages. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## Overview
 
@@ -25,7 +25,7 @@ The architecture emphasizes configurability and research reproducibility, enabli
 
 ### Key Capabilities
 
-- **Multilingual Deep Learning**: Pluggable language profiles supporting 50+ languages across Latin, Cyrillic, Arabic, Devanagari, Georgian, Armenian, and other scripts.
+- **Multilingual Deep Learning**: Pluggable language profiles supporting 52+ languages across Latin, Cyrillic, Arabic, Devanagari, Georgian, Armenian, CJK, and other scripts.
 - **End-to-End Pipeline**: Complete processing chain including:
   - **Preprocessing**: Image normalization, binarization, and augmentation.
   - **Segmentation**: Robust line and word segmentation via U-Net architectures.
@@ -37,7 +37,7 @@ The architecture emphasizes configurability and research reproducibility, enabli
 
 ## Installation
 
-### From PyPI (Coming Soon)
+### From PyPI
 
 ```bash
 pip install thulium

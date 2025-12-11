@@ -1,0 +1,71 @@
+# CJK (Chinese-Japanese-Korean) Multilingual Model Configuration
+#
+# This model handles East Asian writing systems:
+# - Chinese (Simplified and Traditional)
+# - Japanese (Hiragana, Katakana, and common Kanji)
+# - Korean (Hangul syllable blocks)
+#
+# Note: Full CJK support requires very large vocabularies (thousands of
+# characters for Chinese/Japanese Kanji). This configuration provides
+# a framework for CJK HTR with common character coverage.
+
+model:
+  name: "htr_cjk_multilingual"
+  version: "1.0.0"
+  description: "Multilingual CJK script HTR model"
+  
+  backbone:
+    type: "vit"
+    config_name: "vit_htr_base"
+    d_model: 512
+    num_heads: 8
+    num_layers: 8
+    patch_size: [16, 8]
+    
+  decoder:
+    type: "attention"
+    d_model: 512
+    num_heads: 8
+    num_layers: 6
+    max_seq_len: 200
+    
+  vocabulary:
+    script: "cjk"
+    chinese_common: 3000  # Most common simplified characters
+    japanese_kana: true
+    japanese_kanji_common: 2000
+    korean_syllables: true
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.0001
+    weight_decay: 0.05
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 20
+    
+  loss:
+    type: "cross_entropy"
+    label_smoothing: 0.1
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 3
+    
+languages:
+  supported:
+    - zh  # Chinese (Simplified)
+    - ja  # Japanese
+    - ko  # Korean
+    
+decoding:
+  method: "beam_search"
+  beam_width: 5
+  length_penalty: 1.0

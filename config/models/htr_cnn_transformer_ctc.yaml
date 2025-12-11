@@ -1,0 +1,96 @@
+# HTR Model Configuration: CNN + Transformer + CTC
+#
+# This configuration combines convolutional feature extraction with
+# Transformer-based sequence modeling and CTC decoding. The Transformer
+# provides superior modeling of long-range dependencies compared to
+# LSTMs, making it particularly effective for high-resolution line
+# images with many timesteps.
+#
+# Architecture: ResNet34 Backbone -> Transformer Head -> CTC Decoder
+#
+# Suitable for:
+# - High-accuracy requirements
+# - GPU-accelerated training and inference
+# - Complex handwriting with long-range dependencies
+
+model:
+  name: "htr_cnn_transformer_ctc"
+  version: "1.0.0"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet34"
+    in_channels: 3
+    dropout: 0.1
+    
+  sequence_head:
+    type: "transformer"
+    hidden_size: 256
+    num_heads: 8
+    num_layers: 4
+    dim_feedforward: 1024
+    dropout: 0.1
+    pos_encoding: "sinusoidal"
+    pre_norm: true
+    
+  decoder:
+    type: "ctc"
+    blank_index: 0
+    dropout: 0.1
+    
+  height_projection:
+    type: "adaptive_pool"
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.0003
+    weight_decay: 0.05
+    betas: [0.9, 0.98]
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 10
+    min_lr: 0.000001
+    
+  loss:
+    type: "ctc"
+    blank: 0
+    reduction: "mean"
+    zero_infinity: true
+    
+  regularization:
+    label_smoothing: 0.1
+    dropout: 0.1
+    stochastic_depth: 0.1
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 5
+      translate: [0.03, 0.03]
+      scale: [0.9, 1.1]
+    elastic_distortion:
+      alpha: 35
+      sigma: 6
+      probability: 0.4
+    noise:
+      gaussian_std: 0.02
+      probability: 0.3
+    color_jitter:
+      brightness: 0.2
+      contrast: 0.2
+      probability: 0.3
+      
+decoding:
+  method: "beam_search"
+  beam_width: 20
+  lm_alpha: 0.5
+  lm_beta: 0.1
+  length_normalization: true

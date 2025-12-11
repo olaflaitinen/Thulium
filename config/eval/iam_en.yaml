@@ -1,0 +1,32 @@
+# Benchmark Configuration: IAM English Dataset
+#
+# Evaluates HTR performance on English handwriting samples.
+# This is the most common benchmark for HTR systems.
+
+benchmark:
+  name: "iam_english"
+  description: "IAM Handwriting Database - English text recognition benchmark"
+  
+  dataset:
+    type: "line_images"
+    path: "data/iam/lines"
+    split: "test"
+    format: "iam"
+    annotation_file: "data/iam/test.txt"
+  
+  languages:
+    - en
+  
+  model_config: "config/models/htr_cnn_transformer_ctc.yaml"
+  
+  decoding:
+    method: "beam_search"
+    beam_width: 20
+    lm_alpha: 0.5
+    lm_beta: 0.1
+    length_normalization: true
+  
+  device: "auto"
+  num_samples: null  # Evaluate all samples
+  batch_size: 16
+  seed: 42

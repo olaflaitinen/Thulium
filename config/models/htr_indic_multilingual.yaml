@@ -1,0 +1,81 @@
+# Indic Scripts Multilingual Model Configuration
+#
+# This model handles South Asian writing systems including:
+# - Hindi (Devanagari script)
+# - Marathi (Devanagari script)
+# - Bengali
+# - Tamil
+# - Telugu
+# - Gujarati, Kannada, Malayalam, Punjabi (with placeholder support)
+#
+# Indic scripts share structural similarities (abugida systems) which
+# enables effective multilingual modeling.
+
+model:
+  name: "htr_indic_multilingual"
+  version: "1.0.0"
+  description: "Multilingual Indic scripts HTR model"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet34"
+    in_channels: 3
+    dropout: 0.1
+    
+  sequence_head:
+    type: "transformer"
+    hidden_size: 512
+    num_heads: 8
+    num_layers: 6
+    
+  decoder:
+    type: "attention"
+    d_model: 256
+    num_heads: 8
+    num_layers: 4
+    
+  vocabulary:
+    scripts:
+      - devanagari
+      - bengali
+      - tamil
+      - telugu
+    include_numerals: true
+    include_matras: true  # Vowel diacritics
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.0002
+    weight_decay: 0.05
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 15
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 5
+    elastic_distortion:
+      probability: 0.4
+      
+languages:
+  supported:
+    - hi  # Hindi
+    - mr  # Marathi
+    - bn  # Bengali
+    - ta  # Tamil
+    - te  # Telugu
+    - gu  # Gujarati
+    - pa  # Punjabi
+    - kn  # Kannada
+    - ml  # Malayalam
+    
+decoding:
+  method: "beam_search"
+  beam_width: 10

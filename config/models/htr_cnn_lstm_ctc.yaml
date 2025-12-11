@@ -1,0 +1,88 @@
+# HTR Model Configuration: CNN + BiLSTM + CTC
+# 
+# This configuration defines a traditional HTR architecture combining
+# convolutional feature extraction with bidirectional LSTM sequence
+# modeling and CTC decoding. This architecture provides a robust
+# baseline that works well for most handwriting recognition tasks
+# with reasonable computational requirements.
+#
+# Architecture: ResNet18 Backbone -> BiLSTM Head -> CTC Decoder
+#
+# Suitable for:
+# - Initial experiments and baselines
+# - CPU-constrained environments
+# - Medium-resolution line images
+
+model:
+  name: "htr_cnn_lstm_ctc"
+  version: "1.0.0"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet18"
+    in_channels: 3
+    dropout: 0.0
+    
+  sequence_head:
+    type: "bilstm"
+    hidden_size: 256
+    num_layers: 2
+    dropout: 0.3
+    bidirectional: true
+    
+  decoder:
+    type: "ctc"
+    blank_index: 0
+    
+  # Height collapse strategy for CNN -> sequence conversion
+  height_projection:
+    type: "mean_pool"
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.001
+    weight_decay: 0.01
+    betas: [0.9, 0.999]
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 5
+    min_lr: 0.00001
+    
+  loss:
+    type: "ctc"
+    blank: 0
+    reduction: "mean"
+    zero_infinity: true
+    
+  regularization:
+    label_smoothing: 0.0
+    dropout: 0.3
+    
+  augmentation:
+    enabled: true
+    random_affine:
+      degrees: 3
+      translate: [0.02, 0.02]
+      scale: [0.95, 1.05]
+    elastic_distortion:
+      alpha: 30
+      sigma: 5
+      probability: 0.3
+    noise:
+      gaussian_std: 0.01
+      probability: 0.2
+      
+decoding:
+  method: "greedy"  # Options: greedy, beam_search
+  beam_width: 10
+  lm_alpha: 0.0
+  lm_beta: 0.0
+  length_normalization: false

@@ -1,0 +1,33 @@
+# Benchmark Configuration: Baltic Languages Mixed
+#
+# Evaluates HTR performance across Baltic languages
+# including Lithuanian, Latvian, and Estonian.
+
+benchmark:
+  name: "baltic_mixed"
+  description: "Baltic languages HTR benchmark (Lithuanian, Latvian, Estonian)"
+  
+  dataset:
+    type: "line_images"
+    path: "data/baltic"
+    split: "test"
+    format: "folder_per_language"
+  
+  languages:
+    - lt  # Lithuanian
+    - lv  # Latvian
+    - et  # Estonian
+  
+  model_config: "config/models/htr_cnn_transformer_ctc.yaml"
+  
+  decoding:
+    method: "beam_search"
+    beam_width: 15
+    lm_alpha: 0.5
+    lm_beta: 0.1
+    length_normalization: true
+  
+  device: "auto"
+  num_samples: null
+  batch_size: 8
+  seed: 42

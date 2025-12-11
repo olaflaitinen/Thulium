@@ -1,0 +1,73 @@
+# Georgian Script Model Configuration
+#
+# Specialized model for Georgian language using the Mkhedruli script.
+# Georgian has a unique alphabetic system with 33 letters, distinct from
+# other writing systems. This model is tailored specifically for Georgian.
+#
+# Note: Georgian is a low-resource language for HTR. Transfer learning
+# from general multilingual models with fine-tuning is recommended.
+
+model:
+  name: "htr_georgian"
+  version: "1.0.0"
+  description: "Specialized Georgian (Mkhedruli) script HTR model"
+  
+  backbone:
+    type: "resnet"
+    config_name: "resnet18"  # Smaller for low-resource setting
+    in_channels: 3
+    dropout: 0.2
+    
+  sequence_head:
+    type: "bilstm"
+    hidden_size: 256
+    num_layers: 2
+    dropout: 0.3
+    
+  decoder:
+    type: "ctc"
+    blank_index: 0
+    
+  vocabulary:
+    script: "georgian"
+    alphabet_size: 33
+    
+preprocessing:
+  image_height: 64
+  normalize: true
+  
+training:
+  optimizer:
+    type: "adamw"
+    lr: 0.001
+    weight_decay: 0.01
+    
+  scheduler:
+    type: "cosine"
+    warmup_epochs: 5
+    
+  # Transfer learning settings
+  transfer_learning:
+    enabled: true
+    pretrained_model: "htr_latin_multilingual"
+    freeze_backbone_epochs: 5
+    
+  augmentation:
+    enabled: true
+    # More aggressive augmentation for low-resource
+    random_affine:
+      degrees: 7
+      translate: [0.05, 0.05]
+    elastic_distortion:
+      probability: 0.5
+    noise:
+      gaussian_std: 0.03
+      probability: 0.4
+      
+languages:
+  supported:
+    - ka  # Georgian
+    
+decoding:
+  method: "beam_search"
+  beam_width: 15

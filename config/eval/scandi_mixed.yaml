@@ -1,0 +1,36 @@
+# Benchmark Configuration: Scandinavian Languages Mixed
+#
+# Evaluates HTR performance across Scandinavian languages
+# including Norwegian, Swedish, Danish, Icelandic, and Faroese.
+
+benchmark:
+  name: "scandinavian_mixed"
+  description: "Mixed Scandinavian languages HTR benchmark"
+  
+  dataset:
+    type: "line_images"
+    path: "data/scandinavian"
+    split: "test"
+    format: "folder_per_language"
+  
+  languages:
+    - nb  # Norwegian Bokmal
+    - nn  # Norwegian Nynorsk
+    - sv  # Swedish
+    - da  # Danish
+    - is  # Icelandic
+    - fo  # Faroese
+  
+  model_config: "config/pipelines/htr_nordic_latin.yaml"
+  
+  decoding:
+    method: "beam_search"
+    beam_width: 15
+    lm_alpha: 0.6
+    lm_beta: 0.15
+    length_normalization: true
+  
+  device: "auto"
+  num_samples: null
+  batch_size: 8
+  seed: 42

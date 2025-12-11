@@ -1,0 +1,105 @@
+# Training Configuration: Low-Resource Transfer Learning
+#
+# This configuration is optimized for training on low-resource languages
+# (e.g., Georgian, Armenian, Faroese) where limited training data is available.
+#
+# Strategy:
+# 1. Start from a pretrained multilingual model
+# 2. Freeze early layers longer
+# 3. Use aggressive augmentation
+# 4. Apply stronger regularization
+# 5. Train with smaller batches and more epochs
+
+training:
+  name: "htr_low_resource_transfer"
+  description: "Transfer learning for low-resource languages"
+  
+  pretrained_model:
+    path: "checkpoints/htr_latin_multilingual_best.pt"
+    # Freeze backbone for longer to preserve learned features
+    freeze_backbone_epochs: 10
+    # Gradually unfreeze layers
+    gradual_unfreeze: true
+    unfreeze_schedule:
+      epoch_5: ["sequence_head"]
+      epoch_10: ["backbone.layer4"]
+      epoch_15: ["backbone.layer3"]
+      epoch_20: "all"
+      
+  # Data - typically very small datasets
+  data:
+    train_datasets:
+      - name: "target_language_train"
+        path: "data/${LANGUAGE}/train"
+        
+    # Optional: mix with related languages
+    auxiliary_datasets:
+      - name: "related_language"
+        path: "data/${RELATED_LANGUAGE}/train"
+        weight: 0.3  # Lower weight for auxiliary data
+        
+    batch_size: 8  # Smaller batches for stability
+    num_workers: 2
+    
+    # Oversample minority language
+    sampling:
+      strategy: "balanced"
+      oversample_factor: 3
+    
+  optimizer:
+    type: "adamw"
+    lr: 0.00005  # Very low learning rate
+    weight_decay: 0.01
+    
+  scheduler:
+    type: "cosine_warmup"
+    warmup_epochs: 5
+    min_lr: 0.000001
+    
+  epochs: 50
+  gradient_clip: 0.5
+  mixed_precision: true
+  
+  # Strong regularization
+  regularization:
+    dropout: 0.3
+    label_smoothing: 0.15
+    weight_decay: 0.02
+    
+  # Aggressive augmentation to simulate more data
+  augmentation:
+    random_affine:
+      enabled: true
+      degrees: 10
+      translate: [0.08, 0.08]
+      scale: [0.9, 1.1]
+    elastic_distortion:
+      enabled: true
+      probability: 0.6
+      alpha: 3.0
+    noise:
+      enabled: true
+      gaussian_std: 0.04
+      probability: 0.5
+    morphological:
+      enabled: true
+      erosion_probability: 0.2
+      dilation_probability: 0.2
+    color_jitter:
+      enabled: true
+      brightness: 0.2
+      contrast: 0.2
+      
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 10
+    min_delta: 0.001
+    metric: "val_cer"
+    
+  checkpoints:
+    save_best: true
+    save_every: 10
+    
+  device: "auto"
+  seed: 42
