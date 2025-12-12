@@ -4,14 +4,14 @@ This document describes the high-level architecture of Thulium.
 
 ## System Overview
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         HTR Pipeline                             │
-├─────────────────────────────────────────────────────────────────┤
-│  Input Image  →  Preprocessing  →  Feature Extraction  →        │
-│                                                                  │
-│  Sequence Modeling  →  Decoding  →  Post-processing  →  Text    │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Input(Input Image) --> Pre(Preprocessing)
+    Pre --> Feat(Feature Extraction)
+    Feat --> Seq(Sequence Modeling)
+    Seq --> Dec(Decoding)
+    Dec --> Post(Post-processing)
+    Post --> Output(Text)
 ```
 
 ## Component Architecture
@@ -27,7 +27,7 @@ This document describes the high-level architecture of Thulium.
 **Data Loading**
 - `ImageDataset` — Generic image/text pairs
 - `IAMDataset` — IAM Handwriting Database format
-- Lazy loading with caching
+- `Lazy loading` with caching
 
 ### 2. Feature Extraction (Backbone)
 
@@ -96,15 +96,17 @@ thulium/
 
 ## Data Flow
 
-```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│  Image   │───▶│ Backbone │───▶│   Head   │───▶│ Decoder  │
-│ (H,W,C)  │    │ (B,C,H,W)│    │(B,T,D)   │    │  Text    │
-└──────────┘    └──────────┘    └──────────┘    └──────────┘
-                     │               │
-                     ▼               ▼
-              Height collapse   Sequence
-               + reshape        modeling
+```mermaid
+graph LR
+    Image[Image<br>H,W,C] --> Backbone[Backbone<br>B,C,H',W']
+    Backbone --> Height{Height Collapse<br>+ Reshape}
+    Height --> Head[Head<br>B,T,D]
+    Head --> Decoder[Decoder<br>Text]
+    
+    style Image fill:#f9f,stroke:#333
+    style Backbone fill:#dfd,stroke:#333
+    style Head fill:#ff9,stroke:#333
+    style Decoder fill:#9ff,stroke:#333
 ```
 
 ## Configuration

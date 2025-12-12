@@ -10,8 +10,13 @@ HTR must handle significant variability in writing styles.
 
 ## HTR Pipeline
 
-```
-Image → Preprocessing → Feature Extraction → Sequence Modeling → Decoding → Text
+```mermaid
+graph LR
+    Image --> Pre(Preprocessing)
+    Pre --> Feat(Feature Extraction)
+    Feat --> Seq(Sequence Modeling)
+    Seq --> Dec(Decoding)
+    Dec --> Text(Text)
 ```
 
 ### 1. Preprocessing
@@ -24,24 +29,30 @@ Image → Preprocessing → Feature Extraction → Sequence Modeling → Decodin
 
 CNNs or Vision Transformers extract visual features:
 
-```
-Image (H×W×C) → Backbone → Features (H'×W'×D)
+```mermaid
+graph LR
+    Input[Image<br>H x W x C] --> Backbone(Backbone)
+    Backbone --> Features[Features<br>H' x W' x D]
 ```
 
 ### 3. Sequence Modeling
 
 RNNs or Transformers model temporal dependencies:
 
-```
-Features → BiLSTM/Transformer → Sequence (T×D)
+```mermaid
+graph LR
+    Features --> Seq[BiLSTM / Transformer]
+    Seq --> Out[Sequence<br>T x D]
 ```
 
 ### 4. Decoding
 
 CTC or attention-based decoding produces text:
 
-```
-Sequence → Decoder → Characters
+```mermaid
+graph LR
+    Seq(Sequence) --> Decoder(Decoder)
+    Decoder --> Out(Characters)
 ```
 
 ## CTC (Connectionist Temporal Classification)
