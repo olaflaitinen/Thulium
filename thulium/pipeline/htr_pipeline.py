@@ -88,14 +88,90 @@ class HTRPipeline:
         logger.info("Initializing HTRPipeline on %s for %s", self.device, language)
 
         # Initialize Models
-        # In a real scenario, we would load weights here.
+        model_config = self.config.get("model", {})
+        
+        # If backbone config is missing but we have a profile, we might want defaults
+        # But HTRModel handles defaults.
+        
+        # Ensure num_classes matches language profile if not specified
+        if "num_classes" not in model_config:
+            model_config["num_classes"] = self.language_profile.get_vocab_size()
+
         self.segmenter = LineSegmenter(in_channels=3).to(self.device)
         self.recognizer = HTRModel(
-            num_classes=self.language_profile.get_vocab_size()
+            num_classes=model_config.get("num_classes"),
+            backbone_config=model_config.get("backbone"),
+            head_config=model_config.get("head"),
+            decoder_config=model_config.get("decoder"),
         ).to(self.device)
 
         self.segmenter.eval()
         self.recognizer.eval()
+
+    @classmethod
+    def from_config(cls, config_path: str, device: str = "auto", language: str = "en") -> HTRPipeline:
+        """Create a pipeline from a YAML config file."""
+        return cls(config_path=config_path, device=device, language=language)
+
+    @classmethod
+    def from_pretrained(cls, model_name_or_path: str, device: str = "auto", **kwargs) -> HTRPipeline:
+        """Load a pipeline from a pretrained model name or local path.
+        
+        Args:
+            model_name_or_path: 'thulium-base' or path to .pt file.
+            device: 'cpu' or 'cuda'.
+            
+        Returns:
+            Initialized HTRPipeline with loaded weights.
+        """
+        # Map names to URLs (for v1.2.1)
+        GITHUB_RELEASE_URL = "https://github.com/olaflaitinen/Thulium/releases/download/v1.2.1"
+        MODEL_MAP = {
+            "thulium-tiny": f"{GITHUB_RELEASE_URL}/thulium-tiny.pt",
+            "thulium-base": f"{GITHUB_RELEASE_URL}/thulium-base.pt",
+            "thulium-large": f"{GITHUB_RELEASE_URL}/thulium-large.pt",
+            "thulium-multilingual": f"{GITHUB_RELEASE_URL}/thulium-multilingual.pt",
+        }
+        
+        # Map names to Default Configs (bundled in package)
+        # We need to find the config files relative to the package installation
+        import os
+        base_dir = Path(__file__).parent.parent.parent
+        CONFIG_MAP = {
+            "thulium-tiny": base_dir / "config/models/htr_cnn_lstm_ctc_tiny.yaml",
+            "thulium-base": base_dir / "config/models/htr_cnn_lstm_ctc_base.yaml",
+            "thulium-large": base_dir / "config/models/htr_vit_transformer_seq2seq_large.yaml",
+            "thulium-multilingual": base_dir / "config/models/htr_vit_transformer_seq2seq_large.yaml",
+        }
+
+        if model_name_or_path in MODEL_MAP:
+            url = MODEL_MAP[model_name_or_path]
+            config_path = str(CONFIG_MAP[model_name_or_path])
+            logger.info(f"Loading pretrained model {model_name_or_path} from {url}")
+            
+            # Create instance with default config structure for that model type
+            instance = cls(config_path=config_path, device=device, **kwargs)
+            
+            # Load weights
+            state_dict = torch.hub.load_state_dict_from_url(
+                url, map_location=instance.device, check_hash=False, file_name=f"{model_name_or_path}.pt"
+            )
+            instance.recognizer.load_state_dict(state_dict)
+            return instance
+            
+        elif Path(model_name_or_path).exists():
+            # Load from local path
+            # We assume it's a state dict. User must provide config separately or we infer defaults?
+            # For simplicity, if loading local .pt, we assume default 'base' config unless specified
+            # This is a simplification. Ideally saved model format includes config.
+            logger.info(f"Loading local weights from {model_name_or_path}")
+            instance = cls(device=device, **kwargs) # Uses default config
+            state_dict = torch.load(model_name_or_path, map_location=instance.device)
+            instance.recognizer.load_state_dict(state_dict)
+            return instance
+            
+        else:
+            raise ValueError(f"Model {model_name_or_path} not found in model zoo or local path.")
 
     def _resolve_device(self, device_str: str) -> torch.device:
         """Resolve device string to torch.device."""
