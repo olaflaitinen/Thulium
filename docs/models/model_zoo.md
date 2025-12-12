@@ -6,12 +6,13 @@ Pretrained models for handwriting recognition.
 
 | Model | Parameters | CER | WER | Languages | Download |
 |-------|------------|-----|-----|-----------|----------|
-| `thulium-tiny` | 5M | 5.2% | 14.1% | Latin | [link](#) |
-| `thulium-base` | 25M | 3.8% | 10.2% | Latin | [link](#) |
-| `thulium-large` | 100M | 2.9% | 7.8% | Latin | [link](#) |
-| `thulium-multilingual` | 150M | 4.1% | 11.5% | 52+ | [link](#) |
+| `thulium-tiny` | 5M | 5.2% | 14.1% | Latin | [Download](https://github.com/olaflaitinen/Thulium/releases/download/v1.2.1/thulium-tiny.pt) |
+| `thulium-base` | 25M | 3.8% | 10.2% | Latin | [Download](https://github.com/olaflaitinen/Thulium/releases/download/v1.2.1/thulium-base.pt) |
+| `thulium-large` | 100M | 2.9% | 7.8% | Latin | [Download](https://github.com/olaflaitinen/Thulium/releases/download/v1.2.1/thulium-large.pt) |
+| `thulium-multilingual` | 150M | 4.1% | 11.5% | 52+ | [Download](https://github.com/olaflaitinen/Thulium/releases/download/v1.2.1/thulium-multilingual.pt) |
 
-*Metrics measured on IAM test set, batch size 1, PyTorch 2.0*
+*Metrics measured on IAM test set, batch size 1, PyTorch 2.0+*
+> **Note**: Models are hosted as GitHub Release assets. You can also load them directly via `torch.hub`.
 
 ## Model Architectures
 
