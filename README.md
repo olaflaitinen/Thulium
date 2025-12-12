@@ -2,8 +2,8 @@
 
 **State-of-the-art multilingual handwriting text recognition.**
 
-[![PyPI](https://img.shields.io/pypi/v/thulium)](https://pypi.org/project/thulium/)
-[![Python](https://img.shields.io/pypi/pyversions/thulium)](https://pypi.org/project/thulium/)
+[![PyPI](https://img.shields.io/pypi/v/thulium-htr)](https://pypi.org/project/thulium-htr/)
+[![Python](https://img.shields.io/pypi/pyversions/thulium-htr)](https://pypi.org/project/thulium-htr/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen)](docs/)
 
@@ -22,13 +22,13 @@ Arabic, Hebrew, Devanagari, Chinese, Japanese, Korean, and Georgian scripts.
 ## Installation
 
 ```bash
-pip install thulium
+pip install thulium-htr
 ```
 
 For GPU acceleration:
 
 ```bash
-pip install thulium[gpu]
+pip install thulium-htr[gpu]
 ```
 
 ## Quick Start
